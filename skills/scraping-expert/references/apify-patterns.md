@@ -1,8 +1,8 @@
-# Apify Patterns — Production Configuration
+# Apify Patterns - Production Configuration
 
-This page documents the Apify-specific patterns that turn a scraper script into a production Actor. It is not a substitute for the official Apify Academy — read that first if you've never built an Actor. This is the *opinionated layer above*, encoding decisions that the documentation leaves to you.
+This page documents the Apify-specific patterns that turn a scraper script into a production Actor. It is not a substitute for the official Apify Academy - read that first if you've never built an Actor. This is the *opinionated layer above*, encoding decisions that the documentation leaves to you.
 
-**Scope.** This file is the **scraping-engineering configuration layer** (proxy, session pool, KV cache, autoscaling, status messages, monitoring). The Actor *scaffolding itself* — project structure, `actor.json`, `input_schema.json`, build images, and the Crawlee templates — and the MCP-server Standby setup are covered in depth by the Apify Academy and the Crawlee/Apify templates; the patterns here are the scraping-doctrine view of the same files. For the scaffolding mechanics, defer to the official docs and keep this file for the scraping-specific configuration on top.
+**Scope.** This file is the **scraping-engineering configuration layer** (proxy, session pool, KV cache, autoscaling, status messages, monitoring). The Actor *scaffolding itself* - project structure, `actor.json`, `input_schema.json`, build images, and the Crawlee templates - and the MCP-server Standby setup are covered in depth by the Apify Academy and the Crawlee/Apify templates; the patterns here are the scraping-doctrine view of the same files. For the scaffolding mechanics, defer to the official docs and keep this file for the scraping-specific configuration on top.
 
 ---
 
@@ -46,7 +46,7 @@ my-actor/
 └── README.md
 ```
 
-The `docs/` directory is written **before** any source code — it captures the architecture, error taxonomy, and workflow to follow when implementing. This is strongly recommended for non-trivial Actors.
+The `docs/` directory is written **before** any source code - it captures the architecture, error taxonomy, and workflow to follow when implementing. This is strongly recommended for non-trivial Actors.
 
 ---
 
@@ -58,7 +58,7 @@ The minimal viable `actor.json` for a standard run-mode Actor:
 {
   "actorSpecification": 1,
   "name": "my-actor",
-  "title": "My Actor — Concise Tagline",
+  "title": "My Actor - Concise Tagline",
   "description": "One sentence with primary keywords.",
   "version": "0.1",
   "buildTag": "latest",
@@ -114,13 +114,13 @@ Key fields per property:
 ```
 
 Common editors:
-- `textfield`, `textarea` — for strings
-- `stringList` — array of strings (one per line in UI)
-- `requestListSources` — array of URLs/objects, the standard for crawler start URLs
-- `proxy` — for `proxyConfiguration` field (renders the standard proxy widget)
-- `select` — enum dropdown (also requires `enum` and optionally `enumTitles`)
-- `number`, `integer`, `boolean` — direct mappings
-- `json` — raw JSON for advanced users
+- `textfield`, `textarea` - for strings
+- `stringList` - array of strings (one per line in UI)
+- `requestListSources` - array of URLs/objects, the standard for crawler start URLs
+- `proxy` - for `proxyConfiguration` field (renders the standard proxy widget)
+- `select` - enum dropdown (also requires `enum` and optionally `enumTitles`)
+- `number`, `integer`, `boolean` - direct mappings
+- `json` - raw JSON for advanced users
 
 Patterns to use:
 
@@ -178,7 +178,7 @@ Apify's proxy groups are the foundation. Three groups cover 95% of cases:
 | `RESIDENTIAL` | Real ISP IPs. For sites with anti-bot or geo-restrictions. | ~10× |
 | `GOOGLE_SERP` | Specialized for Google SERP. Pre-warmed, geographic routing. | 1.5× |
 
-For ISP proxies (the middle tier between datacenter and residential — static residential IPs hosted in datacenter infrastructure), Apify does not have a dedicated group at the time of writing; either use `RESIDENTIAL` (with sticky sessions to keep the same IP for the duration of a session) or pass an external ISP proxy provider's URLs via `proxyUrls`. ISP is worth considering when datacenter is too hot but residential bandwidth costs are unjustified — typical sweet spot for moderate-protection e-commerce.
+For ISP proxies (the middle tier between datacenter and residential - static residential IPs hosted in datacenter infrastructure), Apify does not have a dedicated group at the time of writing; either use `RESIDENTIAL` (with sticky sessions to keep the same IP for the duration of a session) or pass an external ISP proxy provider's URLs via `proxyUrls`. ISP is worth considering when datacenter is too hot but residential bandwidth costs are unjustified - typical sweet spot for moderate-protection e-commerce.
 
 Configuration:
 
@@ -242,7 +242,7 @@ Tuning:
 - **Moderate volume, moderate protection**: pool size 10–20, `maxUsageCount` 20–30, `maxErrorScore` 1–2.
 - **Hard targets**: pool size 5–10, `maxUsageCount` 5–10, `maxErrorScore` 1.
 
-The smaller the pool and shorter the session lifetime, the more "human-like" each session looks — but the more proxy credits you burn. There is a real trade-off.
+The smaller the pool and shorter the session lifetime, the more "human-like" each session looks - but the more proxy credits you burn. There is a real trade-off.
 
 ---
 
@@ -324,7 +324,7 @@ const crawler = new CheerioCrawler({
 
 Practical guidance:
 
-- **Always set `maxConcurrency`** — defaults are too aggressive for most production cases.
+- **Always set `maxConcurrency`** - defaults are too aggressive for most production cases.
 - **`maxRequestsPerMinute`** is often more useful than `maxConcurrency`. It enforces rate regardless of concurrency choices, which is what most anti-bot rate limiters care about.
 - **Browser crawlers**: `maxConcurrency: 5–10` is the upper bound for 4 GB Actors. Each browser instance is heavy.
 - **HTTP crawlers**: `maxConcurrency: 20–50` is reasonable for static sites.
@@ -354,7 +354,7 @@ await Actor.setStatusMessage(
 );
 ```
 
-For Actors charging PPE, the terminal status message is part of the user experience — it should explain what happened in plain terms ("Analyzed 5 wines successfully — see dataset for results").
+For Actors charging PPE, the terminal status message is part of the user experience - it should explain what happened in plain terms ("Analyzed 5 wines successfully - see dataset for results").
 
 ---
 
@@ -432,7 +432,7 @@ app.listen(port, () => console.log(`MCP server listening on ${port}`));
 Three rules for MCP servers:
 
 1. **Memory: 256 MB minimum.** MCP servers handle many small requests; per-request memory is low. The 256 MB tier is correct.
-2. **Idle timeout matters.** Apify shuts down idle Standby Actors after a configurable period — the field is `webServerIdleTimeoutSecs` in `actor.json` (the `webServer` prefix is required; a bare `idleTimeoutSecs` is silently ignored). The default is fine for most cases; 300 seconds (5 min) is a healthy explicit value. The trade-off is cold-start latency vs idle cost — a longer idle timeout keeps the server warm (faster responses) but bills idle compute.
+2. **Idle timeout matters.** Apify shuts down idle Standby Actors after a configurable period - the field is `webServerIdleTimeoutSecs` in `actor.json` (the `webServer` prefix is required; a bare `idleTimeoutSecs` is silently ignored). The default is fine for most cases; 300 seconds (5 min) is a healthy explicit value. The trade-off is cold-start latency vs idle cost - a longer idle timeout keeps the server warm (faster responses) but bills idle compute.
 3. **No `Actor.main()` pattern.** Don't wrap your code in `Actor.main()`. The Express server runs as the main process; `Actor.init()` is called once at startup.
 
 ---
@@ -454,7 +454,7 @@ if (result.eventChargeLimitReached) {
 }
 ```
 
-Event names are configured in the Apify Console for the Actor; they must match exactly. The standard pattern is one event per *user-visible operation* (one search, one detail fetch, one analysis) — not one per HTTP request.
+Event names are configured in the Apify Console for the Actor; they must match exactly. The standard pattern is one event per *user-visible operation* (one search, one detail fetch, one analysis) - not one per HTTP request.
 
 The synthetic event `apify-actor-start` fires on every run start and should be left at the default price. Don't customize it.
 
